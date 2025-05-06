@@ -103,8 +103,9 @@ def process_data(df, rent_type):
     df["년월"] = df["deal_ymd"].str[:4] + "-" + df["deal_ymd"].str[4:]
     return df
 
+
 def plot_trend(df):
-    plt.rcParams['font.family'] = 'AppleGothic'
+    plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.unicode_minus'] = False
 
     monthly = df.groupby("년월")[["보증금", "월세"]].mean().reset_index()
@@ -112,8 +113,8 @@ def plot_trend(df):
     fig.patch.set_facecolor('black')
     ax.set_facecolor('black')
 
-    ax.plot(monthly["년월"], monthly["보증금"], marker="o", markersize=10, color="yellow", label="보증금(만원)", linewidth=3, alpha=0.4)
-    ax.plot(monthly["년월"], monthly["월세"], marker="s", markersize=10, color="aqua", label="월세(만원)", linewidth=3, alpha=0.4)
+    ax.plot(monthly["년월"], monthly["보증금"], marker="o", markersize=10, color="yellow", label="Deposit (10,000 KRW)", linewidth=3, alpha=0.4)
+    ax.plot(monthly["년월"], monthly["월세"], marker="s", markersize=10, color="aqua", label="Monthly Rent (10,000 KRW)", linewidth=3, alpha=0.4)
 
     for i in range(len(monthly)):
         ax.annotate(f'{monthly["보증금"].iloc[i]:,.0f}', (monthly["년월"].iloc[i], monthly["보증금"].iloc[i]),
@@ -121,8 +122,8 @@ def plot_trend(df):
         ax.annotate(f'{monthly["월세"].iloc[i]:,.0f}', (monthly["년월"].iloc[i], monthly["월세"].iloc[i]),
                     textcoords="offset points", xytext=(0,10), ha='center', color="aqua", fontsize=10,fontweight='bold')
 
-    ax.set_ylabel("금액(만원)\n", color='white')
-    ax.set_xlabel("\n시기", color='white')
+    ax.set_ylabel("\nAmount (10,000 KRW)", color='white')
+    ax.set_xlabel("\nTimeline", color='white')
     plt.xticks(rotation=90, color='white')
     plt.yticks(color='white')
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x,_: f'{int(x):,}'))
