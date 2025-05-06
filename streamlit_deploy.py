@@ -11,6 +11,8 @@ import matplotlib.font_manager as fm
 from matplotlib.ticker import FuncFormatter
 
 import pandas as pd
+import requests
+from io import BytesIO
 import numpy as np
 import streamlit as st
 import xmltodict
@@ -37,13 +39,26 @@ def get_recent_months(n=6):
     return [(now - timedelta(days=30 * i)).strftime("%Y%m") for i in range(n)][::-1]
 
 @st.cache_data
+# def load_region_codes():
+#     df = pd.read_csv(
+#         "국토교통부_법정동코드_20240805.csv",
+#         encoding="euc-kr",
+#         dtype={"법정동코드": str},
+#     )
+#     df = df[df["폐지여부"] == "존재"]
+#     return dict(zip(df["법정동명"], df["법정동코드"]))
+
 def load_region_codes():
-    df = pd.read_csv(
-        "국토교통부_법정동코드_20240805.csv",
-        encoding="euc-kr",
-        dtype={"법정동코드": str},
-    )
-    df = df[df["폐지여부"] == "존재"]
+    # Google Drive 공유 링크의 파일 ID
+    file_id = "13U8jBUf-5kuPt-hGaz6QQE3QR-VxchAI"
+    download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+
+    #파일 다운로드
+    response = requests.get(download_url)
+    response.raise_for_status()
+
+    df = pd.read_csv(BytesIO(response.content), encoding="euc-kr", dtype={"법정동코드":str})
+    df = df[df["폐지여부"]=="존재"]
     return dict(zip(df["법정동명"], df["법정동코드"]))
 
 async def fetch_data_httpx(service_key, lawd_cd, deal_ymd):
