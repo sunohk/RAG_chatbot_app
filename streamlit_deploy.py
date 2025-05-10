@@ -118,6 +118,7 @@ def process_data(df, rent_type):
     return df
 
 
+
 def plot_trend(df):
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.unicode_minus'] = False
@@ -311,6 +312,7 @@ def main():
 
 
     if st.button("데이터 불러오기 및 분석"):
+
         with st.spinner("데이터 수집 중..."):
             lawd_cd = region_codes[region][:5]
             months = get_recent_months(months_to_load)
@@ -322,7 +324,6 @@ def main():
 
             # 데이터 전처리
             df_filtered = process_data(df_all, rent_type)
-            st.session_state.df_filtered = df_filtered
 
             # 층수 및 전용면적 필터링
             df_filtered["floor"] = pd.to_numeric(df_filtered["floor"], errors="coerce")
@@ -331,6 +332,10 @@ def main():
                 (df_filtered["floor"].between(floor_range[0], floor_range[1], inclusive="both")) &
                 (df_filtered["excluUseAr"].between(area_range[0], area_range[1], inclusive="both"))
             ]
+
+            # 데이터 처리 후 세션에 저장
+            st.session_state.df_filtered = df_filtered
+            st.session_state.fig = plot_trend(df_filtered)
 
 
             if "df_filtered" in st.session_state and not df_filtered.empty:
@@ -362,6 +367,29 @@ def main():
                         "preMonthlyRent": "이전 월세(만원)",
                         "houseType": "주택 유형",
                     })[["계약 일자", "지번", "법정동", "건물명", "주택 유형", "계약 기간(개월)", "계약 유형", "건축 년도", "보증금(만원)", "월세(만원)", "층", "전용 면적(㎡)"]]
+
+                    # '계약 일자' 컬럼을 datetime 형식으로 변환한 후, 'yyyy-mm-dd' 형식으로 변환
+                    df_display["계약 일자"] = pd.to_datetime(df_display["계약 일자"], errors='coerce')
+                    df_display["계약 일자"] = df_display["계약 일자"].dt.strftime("%Y-%m-%d")
+
+                    # 데이터 타입 변환 (쉼표 제거 후 변환)
+                    df_display["보증금(만원)"] = df_display["보증금(만원)"].replace(',', '', regex=True).astype(float)
+                    df_display["월세(만원)"] = df_display["월세(만원)"].replace(',', '', regex=True).astype(float)
+
+                    # 데이터 타입 변환
+                    df_display = df_display.astype({
+                        "지번": "string",
+                        "법정동": "string",
+                        "건물명": "string",
+                        "주택 유형": "string",
+                        "계약 기간(개월)": "string",
+                        "계약 유형": "string",
+                        "건축 년도": "Int64",
+                        "보증금(만원)": "float",
+                        "월세(만원)": "float",
+                        "층": "Int64",
+                        "전용 면적(㎡)": "float",
+                    })
 
                     # 계약일자 기준으로 정렬
                     df_display_sorted = df_display.sort_values(by="계약 일자", ascending=False).reset_index(drop=True)
