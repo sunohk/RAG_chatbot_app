@@ -280,7 +280,7 @@ def make_langgraph_chatbot(df):
 def main():
     st.set_page_config(layout='wide')
     st.title("🏠 전월세 실거래가 분석 & 대화형 챗봇")
-
+    
     with st.sidebar:
         st.header("API key 입력")
         openai_key = st.sidebar.text_input("OpenAI API Key", type="password")
@@ -294,7 +294,7 @@ def main():
                 st.session_state.openai_key = openai_key
                 st.session_state.service_key = service_encoding_key
                 st.success("API Key 입력 완료!")
-    
+
     if "openai_key" in st.session_state:
         os.environ["OPENAI_API_KEY"] = st.session_state.openai_key
 
@@ -318,29 +318,18 @@ def main():
 
 
     if st.button("데이터 불러오기 및 분석"):
-        
-        # 챗봇 생성 및 저장
-        st.session_state.chatbot = make_langgraph_chatbot(df_filtered)
-        st.success("챗봇이 초기화되었습니다. 아래에서 질문해보세요!")
-        
         with st.spinner("데이터 수집 중..."):
             lawd_cd = region_codes[region][:5]
             months = get_recent_months(months_to_load)
-            df_all = asyncio.run(fetch_all_data(service_encoding_key, lawd_cd, months))
+            df_all = asyncio.run(fetch_all_data(st.session_state.service_key, lawd_cd, months))
+            df_processed = process_data(df_all, rent_type)
 
-            if df_all.empty:
-                st.warning("해당 기간 및 지역에 대한 데이터가 없습니다.")
-                return
-
-            # 데이터 전처리
-            df_filtered = process_data(df_all, rent_type)
-
-            # 층수 및 전용면적 필터링
-            df_filtered["floor"] = pd.to_numeric(df_filtered["floor"], errors="coerce")
-            df_filtered["excluUseAr"] = pd.to_numeric(df_filtered["excluUseAr"], errors="coerce")
-            df_filtered = df_filtered[
-                (df_filtered["floor"].between(floor_range[0], floor_range[1], inclusive="both")) &
-                (df_filtered["excluUseAr"].between(area_range[0], area_range[1], inclusive="both"))
+            # 층수 및 전용 면적 필터링
+            df_filtered = df_processed[
+                (df_processed["floor"].astype(int) >= floor_range[0]) &
+                (df_processed["floor"].astype(int) <= floor_range[1]) &
+                (df_processed["excluUseAr"].astype(float) >= area_range[0]) &
+                (df_processed["excluUseAr"].astype(float) <= area_range[1])
             ]
 
             # 데이터 처리 후 세션에 저장
