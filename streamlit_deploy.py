@@ -16,7 +16,6 @@ from io import BytesIO
 import numpy as np
 import streamlit as st
 import xmltodict
-import re
 from dotenv import load_dotenv
 
 from langchain.chains import create_retrieval_chain
