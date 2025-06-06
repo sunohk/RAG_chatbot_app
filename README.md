@@ -4,6 +4,8 @@
 - 개발 기간 : 2025-04-15 ~ 2025-05-18
 - URL : https://real-estate-rag-chatbot.streamlit.app/
 
+![RAG_chatbot_app](https://github.com/user-attachments/assets/5c879682-02bb-44fb-9963-d4168207ebb3)
+
 
 이 프로젝트는 전월세 실거래가 데이터를 기반으로 한 데이터 분석 및 LangChain 기반의 챗봇 서비스를 제공합니다. <br>
 사용자는 Streamlit 앱을 통해 지역, 면적, 층수 등의 조건을 필터링하여 거래 데이터를 시각적으로 탐색할 수 있고, 분석 기반의 챗봇에게 해당 조건을 바탕으로 질문을 하여 인사이트를 얻을 수 있습니다.
